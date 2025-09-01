@@ -10,8 +10,10 @@
   Desenvolvido por: Francisco Passos
   Desenvolvido em: 17/06/2025
 
+  ----------------NÃO MODIFICAR O ESPAÇO ACIMA----------------------
+
   Pela última vez - (Software):
-  Modificado em: 27/07/2025
+  Modificado em: 01/09/2025
   Modificado por: Francisco Passos
 
   Manual simplicado do software-hardware abaixo - IMPORTANTE:
@@ -31,13 +33,12 @@
     E-mail reserva: franksteps.contato@gmail.com
     E-mail academy: francisco.alves@dcomp.ufs.br
 
+  Minha página oficial do GitHub com o repositório deste projeto: https://github.com/FrankSteps/Seed_PlusPlus
+
   Respeite a documentação geral e os comentários deste código. Caso faça alguma mudança, notifique-me pessoalmente e/ou mande uma mensagem por intermédio do e-mail contendo a atualização do programa.
   Não apague nenhum destes comentários. Eles facilitarão o trabalho de qualquer desenvolvedor e sempre que fizer uma modificação, comente sobre.
 
   Descrição dos demais desenvolvedores abaixo, por favor:
-  *
-  *
-  *
 */
 
 //Bibliotecas utilizadas no projeto
@@ -55,9 +56,10 @@ const int ledR = 4;
 const int ledG = 6;
 const int chaveADM = 7;
 const int led_ADM = 13;
+
+//Esta função foi mantida aqui por questões de segurança - Jamais coloque demais funções acima desta
 const int tranca = 8;
 
-//Esta função foi mantida aqui por questões de segurança - Não coloque demais funções acima desta
 void trancaInit(){
   digitalWrite(tranca, !LOW);
 }
@@ -75,11 +77,9 @@ bool buttonADM_delete_state = false;
 bool buttonADM_cancel_state = false;
 bool buttonADM_confirm_state = false;
 
-
 //Conexão p/ leitura e gravação do sensor biométrico
 SoftwareSerial conectSerial(2, 3); //RX e TX
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&conectSerial);
-
 
 //Bloco de compatibilização de chamadas -> foi usado no switch da função "mensagem" - Não tire essa função deste lugar 
 enum Mensagem {
@@ -94,7 +94,6 @@ enum Mensagem {
   nEncontrada,
   acessPermitido
 };
-
 
 //Função responsável por guardar as mensagens prontas - Não tire essa função deste lugar
 void mensagem(int msgTipo, bool apagar = 0){
@@ -197,7 +196,6 @@ void mensagem(int msgTipo, bool apagar = 0){
 
 //As demais linhas de código devem ficar abaixo deste comentário e acima do void Setup - Tenha cuidado com as modificações e criações de funções para o projeto
 
-
 // Função para encontrar e retornar um valor inteiro do próximo ID livre
 int getNextAvailableID() {
   for (int id = 1; id <= 127; id++) {
@@ -208,7 +206,6 @@ int getNextAvailableID() {
   mensagem(erro);
   return -1; // caso não tenha nenhum ID disponível
 }
-
 
 // Função para cadastrar nova digital lida no sensor e retornar um valor booleano (verdadeiro ou falso)
 bool enrollFingerprint() {
@@ -279,7 +276,6 @@ bool enrollFingerprint() {
   return 1;
 }
 
-
 // Função para apagar a digital lida no sensor que retorna um valor booleano
 bool deleteFingerprintByScan() {
   Serial.println("Coloque o dedo p/ apagar");
@@ -325,7 +321,6 @@ bool deleteFingerprintByScan() {
   }
 }
 
-
 //Função de retorno de número inteiro que é usado nos botões indicando o número necessário de vezes em que um determinado botão precisa ser precionado (ou não) para uma operação ser considerada como válida ou inválida
 int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, unsigned long timeoutMs = 7000) {
   int confirmCount = 0;
@@ -367,7 +362,6 @@ int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, uns
     }
   }
 }
-
 
 // Indique o led; indique o n; indique o tempo ligado; indique o tempo desligado e indique o estado final
 void signalLed (int led, int vezes, int tempo0, int tempo1, bool estadof){
