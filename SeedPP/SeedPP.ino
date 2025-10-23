@@ -13,7 +13,7 @@
   ----------------NÃO MODIFICAR O ESPAÇO ACIMA----------------------
 
   Pela última vez - (Software):
-  Modificado em: 01/09/2025
+  Modificado em: 23/10/2025
   Modificado por: Francisco Passos
 
   Manual simplicado do software-hardware abaixo - IMPORTANTE:
@@ -61,7 +61,7 @@ const int led_ADM = 13;
 const int tranca = 8;
 
 void trancaInit(){
-  digitalWrite(tranca, !LOW);
+  digitalWrite(tranca, HIGH);
 }
 
 //Variáveis - dispositivos - utilizadas somente no modo de administrador do programa
@@ -82,7 +82,7 @@ SoftwareSerial conectSerial(2, 3); //RX e TX
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&conectSerial);
 
 //Bloco de compatibilização de chamadas -> foi usado no switch da função "mensagem" - Não tire essa função deste lugar 
-enum Mensagem {
+enum mensagem {
   erro,
   erroSen,
   senPronto,
@@ -128,6 +128,7 @@ void mensagem(int msgTipo, bool apagar = 0){
           delay(1000);
         }
       }
+    break;
 
     case senPronto:
       //mensagem aprovando o funcionamento do sensor biométrico
@@ -398,7 +399,6 @@ void chaveADM_on(){
           Serial.println("Digital cadastrada");
           lcd.clear();
           lcd.print("Digital cadastrada");
-          mensagem(operExecutada);
           delay(3000);
           mensagem(emADM);
         } else {
@@ -431,7 +431,6 @@ void chaveADM_on(){
           Serial.println("Digital apagada");
           lcd.clear();
           lcd.print("Digital apagada!");
-          mensagem(operExecutada);
           delay(3000);
           mensagem(emADM);
         } else {
@@ -463,7 +462,6 @@ void chaveADM_on(){
         Serial.println("Todas apagadas");
         lcd.clear(); 
         lcd.print("Todas apagadas");
-        mensagem(operExecutada);
         delay(3000);
         mensagem(emADM);
       } else {
@@ -552,4 +550,4 @@ void loop(){
     mensagem(emLeitura);
     chaveADM_off(); //chama a função responsável pelo modo de leitura 
   }
-}
+} // I'm going back to...
