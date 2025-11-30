@@ -1,0 +1,7 @@
+# Ignorar todos os arquivos
+*
+
+# Exceto estes:
+!Documentacao_Seed-PlusPlus.pdf
+!Seed_PlusPlus_Software/
+!.gitignore
