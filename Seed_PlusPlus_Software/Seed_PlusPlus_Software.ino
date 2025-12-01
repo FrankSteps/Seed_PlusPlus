@@ -47,7 +47,7 @@
 #include <Adafruit_Fingerprint.h> 
 
 
-// Configurações 
+// Configurações I2C
 LiquidCrystal_I2C lcd(0x27, 20, 4); 
 
 // Variáveis - dispositivos - de funcionamento geral do Seed++
@@ -63,7 +63,7 @@ int buttonADM_delete = 10;
 int buttonADM_cancel = 11;
 int buttonADM_confirm = 12;
 
-// Variáveis - estados dos dispositivos - utilizados no modo de administrador do Seed++
+// Variáveis - estados dos dispositivos - utilizados no modo de administrador e para a brir a tranca no modo leitura do Seed++
 bool chaveADM_state = false;
 bool buttonADM_recode_state = false;
 bool buttonADM_delete_state = false;
@@ -542,6 +542,7 @@ void chaveADM_off() {
 void setup() {
   pinMode(tranca, OUTPUT);
   trancaInit();
+  
   Serial.begin(9600);
   finger.begin(57600);
 
