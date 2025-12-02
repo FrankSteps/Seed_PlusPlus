@@ -115,16 +115,16 @@ void mensagem(int msgTipo, bool apagar = 0){
   switch(msgTipo){
     case erro: 
       //mensagem geral de erro
-      Serial.println("Erro encontrado");
-      lcd.print("Algo deu errado");
+      Serial.println(F("Erro encontrado"));
+      lcd.print(F("Algo deu errado"));
       signalLed(ledR, 3, 700, 700, HIGH);
     break;
 
     case erroSen:
       Serial.println("Erro no sensor biométrico");
-      lcd.print("(!) Erro critico");
+      lcd.print(F("(!) Erro critico"));
       lcd.setCursor(0,1);
-      lcd.print("Reinicie agora");
+      lcd.print(F("Reinicie agora"));
       signalLed(ledR, 7, 1000, 1000, HIGH);
       signalLed(ledG, 7, 1000, 1000, HIGH);
       
@@ -139,59 +139,59 @@ void mensagem(int msgTipo, bool apagar = 0){
       }
 
     case senPronto:
-      Serial.println("Sensor biométrico pronto");
-      lcd.print("Sensor pronto!");
+      Serial.println(F("Sensor biométrico pronto"));
+      lcd.print(F("Sensor pronto!"));
       signalLed(ledG, 3, 200, 200, LOW);
     break;
 
     case operExecutada:
-      Serial.println("Operação executada");
-      lcd.print("Feito!");
+      Serial.println(F("Operação executada"));
+      lcd.print(F("Feito!"));
       signalLed(ledG, 3, 200, 200, LOW);
     break;
 
     case operCancel:
-      Serial.println("Operação cancelada");
-      lcd.print("Operacao cancelada");
+      Serial.println(F("Operação cancelada"));
+      lcd.print(F("Operacao cancelada"));
       signalLed(ledR, 3, 200, 200, HIGH);
     break;
 
     case emADM:
-      Serial.println("Modo ADM ativo");
-      lcd.print("Modo ADM ativo");
+      Serial.println(F("Modo ADM ativo"));
+      lcd.print(F("Modo ADM ativo"));
       lcd.setCursor(0,1);
-      lcd.print("Laboratorio da FnE");
+      lcd.print(F("Laboratorio da FnE"));
       lcd.setCursor(0,3); 
-      lcd.print("Aguardando cmd");
+      lcd.print(F("Aguardando cmd"));
     break;
 
     case mensg2xCancela:
       lcd.setCursor(0,3);
-      lcd.print("2x para cancelar");
+      lcd.print(F("2x para cancelar"));
       delay(500);
     break;
 
     case emLeitura:
-      Serial.println("Modo leitura");
-      lcd.print("Modo Leitura ativo");
+      Serial.println(F("Modo leitura"));
+      lcd.print(F("Modo Leitura ativo"));
       lcd.setCursor(0,1);
-      lcd.print("Laboratorio da FnE");
+      lcd.print(F("Laboratorio da FnE"));
     break;
     
     case nEncontrada:
-      Serial.print("Digital não encontrada");
-      lcd.print("Nao cadastrada");
+      Serial.print(F("Digital não encontrada"));
+      lcd.print(F("Nao cadastrada"));
       signalLed(ledR, 3, 200, 200, HIGH);
     break;
 
     case acessPermitido:
-      Serial.println("Digital cadastrada e encontrada");
-      Serial.print("Acesso: ");
+      Serial.println(F("Digital cadastrada e encontrada"));
+      Serial.print(F("Acesso: "));
       Serial.println(finger.fingerID); 
-      lcd.print("Acesso ID: ");
+      lcd.print(F("Acesso ID: "));
       lcd.print(finger.fingerID);
       lcd.setCursor(0,1);
-      lcd.print("Acesso Liberado");
+      lcd.print(F("Acesso Liberado"));
     break;
   }
 }
@@ -203,7 +203,7 @@ void mensagem(int msgTipo, bool apagar = 0){
  Lembre-se: Para uma função ser chamada sem dar erro, ela precisa ser declarada antes. 
 */
 
-// Função que quando chamada, abre a tranca imediatamente e fecha após 3seg
+// Função que, quando chamada, abre a tranca imediatamente e fecha após 3seg
 void abrir_tranca(bool acionadoBotao = 0){
   digitalWrite(tranca, LOW);
   if(acionadoBotao == 0){
@@ -240,66 +240,66 @@ bool enrollFingerprint() {
   
   int id = getNextAvailableID();
   if (id == -1) {
-    Serial.println("Memoria cheia");
+    Serial.println(F("Memoria cheia"));
     lcd.clear(); 
     lcd.setCursor(0,0); 
-    lcd.print("Memoria cheia");
+    lcd.print(F("Memoria cheia"));
     return 0;
   }
 
   // Indicando o ID que será feito o possível cadastro
-  Serial.print("ID livre: ");
+  Serial.print(F("ID livre: "));
   Serial.println(id);
   lcd.clear(); 
   lcd.setCursor(0,0);
-  lcd.print("ID livre:");
+  lcd.print(F("ID livre: "));
   lcd.print(id);
 
 
   // Início do processo de gravação de uma nova digital do usuário no dispositivo com autenticação em duas etapas
   lcd.setCursor(0,1);
-  lcd.print("Coloque dedo 1 / 2");
+  lcd.print(F("Coloque dedo 1 / 2"));
 
 
   // Primeira etapa da autenticação 
   while (finger.getImage() != FINGERPRINT_OK); 
   if (finger.image2Tz(1) != FINGERPRINT_OK) {
     lcd.clear(); 
-    lcd.print("Erro na leitura");
+    lcd.print(F("Erro na leitura"));
     return 0;
   }
 
   lcd.clear(); 
-  lcd.print("Remova o dedo");
+  lcd.print(F("Remova o dedo"));
   delay(2000);
 
 
   // Segunda etapa da autenticação 
   lcd.clear(); 
-  lcd.print("Coloque dedo 2 / 2");
+  lcd.print(F("Coloque dedo 2 / 2"));
   
   while (finger.getImage() != FINGERPRINT_OK);
   if(finger.image2Tz(2) != FINGERPRINT_OK) {
     lcd.clear(); 
-    lcd.print("Erro na leitura");
+    lcd.print(F("Erro na leitura"));
     return 0;
   }
   if(finger.createModel() != FINGERPRINT_OK) {
     lcd.clear(); 
-    lcd.print("Erro no modelo");
+    lcd.print(F("Erro no modelo"));
     return 0;
   }
   if(finger.storeModel(id) != FINGERPRINT_OK) {
     lcd.clear(); 
-    lcd.print("Erro ao salvar");
+    lcd.print(F("Erro ao salvar"));
     return 0;
   }
 
   // Fim do processo de gravação de digital e mensagem notificando o feito
-  Serial.print("Digital cadastrada ID:");
+  Serial.print(F("Digital cadastrada ID:"));
   Serial.println(id);
   lcd.clear(); 
-  lcd.print("Digital salva no ID:");
+  lcd.print(F("Digital salva no ID:"));
   lcd.setCursor(0,1);
   lcd.print(id);
   
@@ -312,18 +312,18 @@ bool enrollFingerprint() {
 bool deleteFingerprintByScan() {
   Watchdog.disable();
   
-  Serial.println("Coloque o dedo p/ apagar");
+  Serial.println(F("Coloque o dedo p/ apagar"));
   lcd.clear(); 
-  lcd.print("Coloque o dedo para");
+  lcd.print(F("Coloque o dedo para"));
   lcd.setCursor(0,1);
-  lcd.print("apagar");
+  lcd.print(F("apagar"));
 
   // Responsável por converter a digital lida no sensor para binário  
   while (finger.getImage() != FINGERPRINT_OK);
   if (finger.image2Tz() != FINGERPRINT_OK) {
-    Serial.println("Erro na conversao");
+    Serial.println(F("Erro na conversao"));
     lcd.clear(); 
-    lcd.print("Erro na leitura");
+    lcd.print(F("Erro na leitura"));
     return 0;
   }
 
@@ -335,22 +335,22 @@ bool deleteFingerprintByScan() {
   }
 
   int id = finger.fingerID;
-  Serial.print("Digital ID: ");
+  Serial.print(F("Digital ID: "));
   Serial.println(finger.fingerID);
 
   // Verificando se a digital foi, de fato, apagada
   if (finger.deleteModel(id) == FINGERPRINT_OK) {
-    Serial.println("Digital apagada");
+    Serial.println(F("Digital apagada"));
     lcd.clear(); 
-    lcd.print("Digital apagada");
+    lcd.print(F("Digital apagada"));
     lcd.setCursor(0,1);
-    lcd.print("ID:");
+    lcd.print(F("ID: "));
     lcd.print(id);
     return 1;
   } else {
-    Serial.println("Erro ao apagar a digital");
+    Serial.println(F("Erro ao apagar a digital"));
     lcd.clear(); 
-    lcd.print("Erro ao apagar");
+    lcd.print(F("Erro ao apagar"));
     return 0;
   }
   
@@ -361,7 +361,7 @@ bool deleteFingerprintByScan() {
  Função de retorno de número inteiro que é usado nos botões indicando o número necessário de vezes em que um determinado botão 
  precisa ser precionado (ou não) para uma operação ser considerada como válida ou inválida
 */
-int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, unsigned long timeoutMs = 7000) {
+int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, unsigned long timeoutMs = 6000) {
   int confirmCount = 0;
   int cancelCount = 0;
   unsigned long startTime = millis();
@@ -371,15 +371,16 @@ int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, uns
     //cronômetro que vai de 0 à o número em milisec que está na variável "timeoutMs"
     if (millis() - startTime > timeoutMs) {
       // Timeout atingido
-      Serial.println("Timeout na espera de acao");
+      Serial.println(F("Timeout na espera de acao"));
       signalLed(ledR, 3, 200, 200, HIGH);
+      Watchdog.reset();
       return 0;  // Considera como cancelado
     }
 
     // Verifica contador do botão de confirmação 
     if (digitalRead(buttonADM_confirm) == LOW) {
       confirmCount++;
-      Serial.print("Confirmações: ");
+      Serial.print(F("Confirmações: "));
       Serial.println(confirmCount);
       delay(250); 
       if (confirmCount >= confirmacoesNecessarias) {
@@ -391,7 +392,7 @@ int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, uns
     // Verifica contador do botão de cancelamento
     if (digitalRead(buttonADM_cancel) == LOW) {
       cancelCount++;
-      Serial.print("Cancelamentos: ");
+      Serial.print(F("Cancelamentos: "));
       Serial.println(cancelCount);
       delay(250);
       if (cancelCount >= cancelamentosNecessarios) {
@@ -455,30 +456,30 @@ void chaveADM_on(){
     if(buttonADM_recode_state == LOW){
       Watchdog.disable();
       
-      Serial.println("Cadastrar digital");
+      Serial.println(F("Cadastrar digital"));
       lcd.clear(); 
-      lcd.print("Cadastrando");
+      lcd.print(F("Cadastrando"));
       lcd.setCursor(0,1); 
-      lcd.print("Confirma 1x");
+      lcd.print(F("Confirma 1x"));
       mensagem(mensg2xCancela, 1);
 
       int resultado = verificarAcao(1, 2);
       if (resultado == 1) {
         if(enrollFingerprint()){
-          Serial.println("Digital cadastrada");
+          Serial.println(F("Digital cadastrada"));
           lcd.clear();
-          lcd.print("Digital cadastrada");
+          lcd.print(F("Digital cadastrada"));
           mensagem(operExecutada);
           delay(3000);
           mensagem(emADM);
         } else {
-          Serial.println("Falha no cadastro");
+          Serial.println(F("Falha no cadastro"));
           mensagem(erro);
           delay(3000);
           mensagem(emADM);
         }
       } else {
-        Serial.println("Cadastro cancelado");
+        Serial.println(F("Cadastro cancelado"));
         mensagem(operCancel);
         delay(3000);
         mensagem(emADM);
@@ -490,31 +491,31 @@ void chaveADM_on(){
     if(buttonADM_delete_state == LOW && buttonADM_confirm_state == HIGH){
       Watchdog.disable();
       
-      Serial.println("Apagar UMA digital");
+      Serial.println(F("Apagar UMA digital"));
       lcd.clear(); 
-      lcd.print("Apagar 1 digital");
+      lcd.print(F("Apagar 1 digital"));
       lcd.setCursor(0,1); 
-      lcd.print("Confirma 2x");
+      lcd.print(F("Confirma 2x"));
       mensagem(mensg2xCancela, 1);
 
       int resultado = verificarAcao(2, 2);
 
       if (resultado == 1) {
         if(deleteFingerprintByScan()){
-          Serial.println("Digital apagada");
+          Serial.println(F("Digital apagada"));
           lcd.clear();
-          lcd.print("Digital apagada!");
+          lcd.print(F("Digital apagada!"));
           mensagem(operExecutada);
           delay(3000);
           mensagem(emADM);
         } else {
-          Serial.println("Falha ao apagar");
+          Serial.println(F("Falha ao apagar"));
           mensagem(erro);
           delay(3000);
           mensagem(emADM);
         }
       } else {
-        Serial.println("Exclusão única cancelada");
+        Serial.println(F("Exclusão única cancelada"));
         mensagem(operCancel);
         delay(3000);
         mensagem(emADM);
@@ -526,24 +527,24 @@ void chaveADM_on(){
     if(buttonADM_delete_state == LOW && buttonADM_confirm_state == LOW){
       Watchdog.disable();
       
-      Serial.println("Apagar TODAS as digitais");
+      Serial.println(F("Apagar TODAS as digitais"));
       lcd.clear(); 
-      lcd.print("Apagar TUDO");
+      lcd.print(F("Apagar TUDO"));
       lcd.setCursor(0,1); 
-      lcd.print("Confirme 3x");
+      lcd.print(F("Confirme 3x"));
       mensagem(mensg2xCancela, 1);
 
       int resultado = verificarAcao(3, 2);
       if (resultado == 1) {
         finger.emptyDatabase(); // Apaga todas as digitais cadastradas
-        Serial.println("Todas apagadas");
+        Serial.println(F("Todas apagadas"));
         lcd.clear(); 
-        lcd.print("Todas apagadas");
+        lcd.print(F("Todas apagadas"));
         mensagem(operExecutada);
         delay(3000);
         mensagem(emADM);
       } else {
-        Serial.println("Exclusão total cancelada");
+        Serial.println(F("Exclusão total cancelada"));
         mensagem(operCancel);
         delay(3000);
         mensagem(emADM);
@@ -553,7 +554,7 @@ void chaveADM_on(){
     delay(50);
     Watchdog.reset();
   }
-  Serial.println("Saindo do modo ADM");
+  Serial.println(F("Saindo do modo ADM"));
   delay(1000);
 }
 
@@ -628,7 +629,7 @@ void setup() {
   Watchdog.enable(7000);
   VerifySensor();
   if (!checkLCD()) {
-    while(1); // watchdog vai reiniciar
+    while(1); // watchdog vai reiniciar o arduino
   }
   Watchdog.reset();
 }
