@@ -11,7 +11,7 @@
   Desenvolvido em:   17/06/2025
 
   Pela última vez - (Software):
-  Modificado em:  30/11/2025
+  Modificado em:  02/12/2025
   Modificado por: Francisco Passos
 
   Manual simplicado do software-hardware abaixo - IMPORTANTE:
@@ -44,11 +44,14 @@
 // Bibliotecas utilizadas pelo Seed++
 #include <SoftwareSerial.h> 
 #include <LiquidCrystal_I2C.h> 
+#include <Wire.h>
 #include <Adafruit_Fingerprint.h> 
+#include <Adafruit_SleepyDog.h>
 
+#define LCD_ADDRESS 0x27
 
 // Configurações I2C
-LiquidCrystal_I2C lcd(0x27, 20, 4); 
+LiquidCrystal_I2C lcd(LCD_ADDRESS, 20, 4); 
 
 // Variáveis - dispositivos - de funcionamento geral do Seed++
 const int ledR = 4;
@@ -217,6 +220,7 @@ void abrir_tranca(bool acionadoBotao = 0){
   signalLed(ledR, 0, 0, 0, HIGH); 
 }
 
+
 // Função para encontrar e retornar um valor inteiro do próximo ID livre
 int getNextAvailableID() {
   for (int id = 1; id <= 127; id++) {
@@ -232,6 +236,8 @@ int getNextAvailableID() {
 
 // Função para cadastrar nova digital lida no sensor e retornar um valor booleano (verdadeiro ou falso)
 bool enrollFingerprint() {
+  Watchdog.disable();
+  
   int id = getNextAvailableID();
   if (id == -1) {
     Serial.println("Memoria cheia");
@@ -288,7 +294,7 @@ bool enrollFingerprint() {
     lcd.print("Erro ao salvar");
     return 0;
   }
-  
+
   // Fim do processo de gravação de digital e mensagem notificando o feito
   Serial.print("Digital cadastrada ID:");
   Serial.println(id);
@@ -296,12 +302,15 @@ bool enrollFingerprint() {
   lcd.print("Digital salva no ID:");
   lcd.setCursor(0,1);
   lcd.print(id);
+  Watchdog.enable(7000);
   return 1;
 }
 
 
 // Função para apagar a digital lida no sensor que retorna um valor booleano
 bool deleteFingerprintByScan() {
+  Watchdog.disable();
+  
   Serial.println("Coloque o dedo p/ apagar");
   lcd.clear(); 
   lcd.print("Coloque o dedo para");
@@ -341,6 +350,7 @@ bool deleteFingerprintByScan() {
     Serial.println("Erro ao apagar a digital");
     lcd.clear(); 
     lcd.print("Erro ao apagar");
+    Watchdog.enable(7000);
     return 0;
   }
 }
@@ -402,9 +412,37 @@ void signalLed (int led, int vezes, int tempo0, int tempo1, bool estadof){
   digitalWrite(led, estadof);
 }
 
+
+// Função para verificar o sensor 
+// Caso o sensor apresente falha, ele entra em loop infinito disparando o watch dog
+void VerifySensor(){
+  if (!finger.verifyPassword()) {
+    while (1); 
+  } else {
+    Watchdog.reset();
+  }
+}
+
+// Função para verificar o I2C
+bool checkLCD(){
+  Wire.beginTransmission(LCD_ADDRESS);
+  byte error = Wire.endTransmission();
+  return (error == 0); // 0 = respondeu 
+}
+
+
 // Função responsável pelo modo de administrador - Gravar ou apagar UMA ou TODAS as digitais
 void chaveADM_on(){
   while(digitalRead(chaveADM) == HIGH){
+    // verificando o sistema
+    Watchdog.reset();
+    VerifySensor();
+    if (!checkLCD()) {
+      while(1); // watchdog vai reiniciar
+    } else {
+      Watchdog.reset();
+    }
+    
     // Indicando as variáveis de estado dos botões aos seus respectivos botões:
     buttonADM_recode_state = digitalRead(buttonADM_recode);
     buttonADM_delete_state = digitalRead(buttonADM_delete);
@@ -413,6 +451,8 @@ void chaveADM_on(){
 
     // CADASTRAR UMA NOVA DIGITAL
     if(buttonADM_recode_state == LOW){
+      Watchdog.disable();
+      
       Serial.println("Cadastrar digital");
       lcd.clear(); 
       lcd.print("Cadastrando");
@@ -441,10 +481,13 @@ void chaveADM_on(){
         delay(3000);
         mensagem(emADM);
       }
+      Watchdog.enable(7000);
     }
 
     // APAGAR UMA DIGITAL
     if(buttonADM_delete_state == LOW && buttonADM_confirm_state == HIGH){
+      Watchdog.disable();
+      
       Serial.println("Apagar UMA digital");
       lcd.clear(); 
       lcd.print("Apagar 1 digital");
@@ -474,10 +517,13 @@ void chaveADM_on(){
         delay(3000);
         mensagem(emADM);
       }
+      Watchdog.enable(7000);
     }
 
     // APAGAR TODAS AS DIGITAIS CADASTRADAS
     if(buttonADM_delete_state == LOW && buttonADM_confirm_state == LOW){
+      Watchdog.disable();
+      
       Serial.println("Apagar TODAS as digitais");
       lcd.clear(); 
       lcd.print("Apagar TUDO");
@@ -500,8 +546,10 @@ void chaveADM_on(){
         delay(3000);
         mensagem(emADM);
       }
+      Watchdog.enable(7000);
     }
     delay(50);
+    Watchdog.reset();
   }
   Serial.println("Saindo do modo ADM");
   delay(1000);
@@ -512,6 +560,15 @@ void chaveADM_on(){
 void chaveADM_off() {
   mensagem(emLeitura);
   while(digitalRead(chaveADM) == LOW){
+    // verificando o sistema
+    Watchdog.reset();
+    VerifySensor();
+    if (!checkLCD()) {
+      while(1); // watchdog vai reiniciar
+    } else {
+      Watchdog.reset();
+    }
+    
     // Indicando as variáveis de estado dos botões aos seus respectivos botões:
     buttonADM_recode_state = digitalRead(buttonADM_recode);
     buttonADM_delete_state = digitalRead(buttonADM_delete);
@@ -542,10 +599,10 @@ void chaveADM_off() {
 void setup() {
   pinMode(tranca, OUTPUT);
   trancaInit();
-  
+
   Serial.begin(9600);
   finger.begin(57600);
-
+  Watchdog.disable();
 
   // Configurandos todos os componentes do seed++
   pinMode(ledR, OUTPUT);
@@ -565,13 +622,13 @@ void setup() {
   lcd.setCursor(0,0);
   lcd.clear();
 
-
-  // Verificando se o sensor está funcionando e emitindo uma mensagem
-  if(finger.verifyPassword()){
-    mensagem(senPronto);
-  }else{
-    mensagem(erroSen);
+  // Verificando a comunicação com o sensor
+  Watchdog.enable(7000);
+  VerifySensor();
+  if (!checkLCD()) {
+    while(1); // watchdog vai reiniciar
   }
+  Watchdog.reset();
 }
 
 // Função de loop - apenas responsável pela troca dos modos
