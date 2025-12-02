@@ -302,6 +302,7 @@ bool enrollFingerprint() {
   lcd.print("Digital salva no ID:");
   lcd.setCursor(0,1);
   lcd.print(id);
+  
   Watchdog.enable(7000);
   return 1;
 }
@@ -350,9 +351,10 @@ bool deleteFingerprintByScan() {
     Serial.println("Erro ao apagar a digital");
     lcd.clear(); 
     lcd.print("Erro ao apagar");
-    Watchdog.enable(7000);
     return 0;
   }
+  
+  Watchdog.enable(7000);
 }
 
 /*
@@ -637,11 +639,13 @@ void loop(){
   if(chaveADM_state == HIGH){
     // Modo administrador
     digitalWrite(led_ADM, HIGH);
+    Watchdog.reset();
     mensagem(emADM);
     chaveADM_on(); 
   }else{
     // Modo leitura
     digitalWrite(led_ADM, LOW);
+    Watchdog.reset();
     mensagem(emLeitura);
     chaveADM_off(); 
   }
