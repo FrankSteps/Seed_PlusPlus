@@ -37,7 +37,6 @@
 #include <LiquidCrystal_I2C.h> 
 #include <Wire.h>
 #include <Adafruit_Fingerprint.h> 
-#include <Adafruit_SleepyDog.h>
 
 #define LCD_ADDRESS 0x27
 
@@ -208,8 +207,6 @@ int getNextAvailableID() {
 
 // Função para cadastrar nova digital lida no sensor e retornar um valor booleano (verdadeiro ou falso)
 bool enrollFingerprint() {
-  Watchdog.disable();
-
   // Alertando o usuário sobre a memória cheia
   int id = getNextAvailableID();
   if (id == -1) {
@@ -273,16 +270,12 @@ bool enrollFingerprint() {
   lcd.print(F("Digital salva no ID:"));
   lcd.setCursor(0,1);
   lcd.print(id);
-  
-  Watchdog.enable(7000);
   return 1;
 }
 
 
 // Função para apagar a digital lida no sensor
 bool deleteFingerprintByScan() {
-  Watchdog.disable();
-
   Serial.println(F("Coloque o dedo p/ apagar"));
   lcd.clear(); 
   lcd.print(F("Coloque o dedo para"));
@@ -323,7 +316,6 @@ bool deleteFingerprintByScan() {
     lcd.print(F("Erro ao apagar"));
     return 0;
   }
-  Watchdog.enable(7000);
 }
 
 /*
@@ -341,7 +333,6 @@ int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, uns
     if (millis() - startTime > timeoutMs) {
       Serial.println(F("Timeout na espera de acao"));
       signalLed(ledR, 3, 200, 200, HIGH);
-      Watchdog.reset();
       return 0; 
     }
 
@@ -387,31 +378,17 @@ void signalLed (int led, int vezes, int tempo0, int tempo1, bool estadof){
 // Funções que verificam a comunicação dos componentes com o Seed++
 void VerifySensor(){
   if (!finger.verifyPassword()) {
-    while (1); 
+    mensagem(erroSen);
   } else {
-    Watchdog.reset();
+    mensagem(senPronto);
   }
 }
 
-bool checkLCD(){
-  Wire.beginTransmission(LCD_ADDRESS);
-  byte error = Wire.endTransmission();
-  return (error == 0); // 0 = respondeu = TRUE
-}
-
-
 // Modo administrador
 void chaveADM_on(){
+  mensagem(emADM);
+  
   while(digitalRead(chaveADM) == HIGH){
-    // verificando o sistema
-    Watchdog.reset();
-    VerifySensor();
-    if (!checkLCD()) {
-      while(1);
-    } else {
-      Watchdog.reset();
-    }
-    
     // Indicando as variáveis de estado dos botões 
     buttonADM_recode_state = digitalRead(buttonADM_recode);
     buttonADM_delete_state = digitalRead(buttonADM_delete);
@@ -420,8 +397,6 @@ void chaveADM_on(){
 
     // CADASTRAR UMA NOVA DIGITAL
     if(buttonADM_recode_state == LOW){
-      Watchdog.disable();
-      
       Serial.println(F("Cadastrar digital"));
       lcd.clear(); 
       lcd.print(F("Cadastrando"));
@@ -450,13 +425,10 @@ void chaveADM_on(){
         delay(3000);
         mensagem(emADM);
       }
-      Watchdog.enable(7000);
     }
 
     // APAGAR UMA DIGITAL
     if(buttonADM_delete_state == LOW && buttonADM_confirm_state == HIGH){
-      Watchdog.disable();
-      
       Serial.println(F("Apagar UMA digital"));
       lcd.clear(); 
       lcd.print(F("Apagar 1 digital"));
@@ -486,13 +458,10 @@ void chaveADM_on(){
         delay(3000);
         mensagem(emADM);
       }
-      Watchdog.enable(7000);
     }
 
     // APAGAR TODAS AS DIGITAIS CADASTRADAS
     if(buttonADM_delete_state == LOW && buttonADM_confirm_state == LOW){
-      Watchdog.disable();
-      
       Serial.println(F("Apagar TODAS as digitais"));
       lcd.clear(); 
       lcd.print(F("Apagar TUDO"));
@@ -515,10 +484,8 @@ void chaveADM_on(){
         delay(3000);
         mensagem(emADM);
       }
-      Watchdog.enable(7000);
     }
     delay(50);
-    Watchdog.reset();
   }
   Serial.println(F("Saindo do modo ADM"));
   delay(1000);
@@ -530,16 +497,6 @@ void chaveADM_off() {
   mensagem(emLeitura);
   
   while(digitalRead(chaveADM) == LOW){
-    
-    // Verificando a comunicação dos componentes com o Seed++
-    Watchdog.reset();
-    VerifySensor();
-    if (!checkLCD()) {
-      while(1);
-    } else {
-      Watchdog.reset();
-    }
-    
     // Indicando as variáveis de estado dos botões aos seus respectivos botões:
     buttonADM_recode_state = digitalRead(buttonADM_recode);
     buttonADM_delete_state = digitalRead(buttonADM_delete);
@@ -573,10 +530,13 @@ void setup() {
   // Essa configuração foi mantida aqui por questões de segurança
   pinMode(tranca, OUTPUT);
   digitalWrite(tranca, HIGH);
-
   Serial.begin(9600);
   finger.begin(57600);
-  Watchdog.disable();
+
+  /*
+   O sistema para verificar a comunicação do sensor biométrico e da tela LCD com o Seed++ foi retirado apenas por um momento. 
+   Assim que possível, irei aplicá-los novamente. 
+  */
 
   // Configurandos todos os componentes do seed++
   pinMode(ledR, OUTPUT);
@@ -595,14 +555,6 @@ void setup() {
   lcd.backlight();
   lcd.setCursor(0,0);
   lcd.clear();
-
-  // Verificando a comunicação com o sensor
-  Watchdog.enable(7000);
-  VerifySensor();
-  if (!checkLCD()) {
-    while(1);
-  }
-  Watchdog.reset();
 }
 
 // Troca dos modos disponíveis com base no estado da chave de segurança
@@ -611,14 +563,10 @@ void loop(){
   if(chaveADM_state == HIGH){
     // Modo administrador
     digitalWrite(led_ADM, HIGH);
-    Watchdog.reset();
-    mensagem(emADM);
     chaveADM_on(); 
   }else{
     // Modo leitura
     digitalWrite(led_ADM, LOW);
-    Watchdog.reset();
-    mensagem(emLeitura);
     chaveADM_off(); 
   }
 }
