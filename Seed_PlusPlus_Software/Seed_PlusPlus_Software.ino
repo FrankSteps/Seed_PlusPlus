@@ -50,8 +50,10 @@
 
 #define LCD_ADDRESS 0x27
 
-// Configurações I2C
+// Configurações de comunicação
 LiquidCrystal_I2C lcd(LCD_ADDRESS, 20, 4); 
+SoftwareSerial conectSerial(2, 3); //RX e TX
+Adafruit_Fingerprint finger = Adafruit_Fingerprint(&conectSerial);
 
 // Variáveis - dispositivos - de funcionamento geral do Seed++
 const int ledR = 4;
@@ -72,17 +74,6 @@ bool buttonADM_recode_state = false;
 bool buttonADM_delete_state = false;
 bool buttonADM_cancel_state = false;
 bool buttonADM_confirm_state = false;
-
-
-// Esta função foi mantida aqui por questões de segurança - Não coloque demais funções acima desta
-void trancaInit(){
-  digitalWrite(tranca, HIGH);
-}
-
-
-// Conexão p/ leitura e gravação do sensor biométrico
-SoftwareSerial conectSerial(2, 3); //RX e TX
-Adafruit_Fingerprint finger = Adafruit_Fingerprint(&conectSerial);
 
 
 /* 
@@ -203,21 +194,22 @@ void mensagem(int msgTipo, bool apagar = 0){
  Lembre-se: Para uma função ser chamada sem dar erro, ela precisa ser declarada antes. 
 */
 
-// Função que, quando chamada, abre a tranca imediatamente e fecha após 3seg
-void abrir_tranca(bool acionadoBotao = 0){
+// Abre a tranca, espera 3 segundos e fecha
+void abrir_tranca(bool acionadoPorBotao = false) {
+  // Abre a tranca
   digitalWrite(tranca, LOW);
-  if(acionadoBotao == 0){
-    mensagem(acessPermitido);
-  }
-  signalLed(ledR, 0, 0, 0, LOW);
-  signalLed(ledG, 1, 3000, 0, LOW);
-
   
-  digitalWrite(tranca, HIGH); 
-  if(acionadoBotao == 0){
-    mensagem(emLeitura);
-  }
-  signalLed(ledR, 0, 0, 0, HIGH); 
+  // Chamado quando o sensor encontra uma digital cadastrada
+  if (!acionadoPorBotao) mensagem(acessPermitido);
+  signalLed(ledR, 0, 0, 0, LOW);       
+  signalLed(ledG, 1, 3000, 0, LOW);     
+
+  // Fecha a tranca
+  digitalWrite(tranca, HIGH);
+
+  // Chamado quando um dos botões ADM é pressionado no modo Leitura
+  if (acionadoPorBotao) mensagem(emLeitura);
+  signalLed(ledR, 0, 0, 0, HIGH);
 }
 
 
@@ -562,7 +554,9 @@ void chaveADM_on(){
 // Função responsável pelo modo normal - modo somente de leitura de digitais cadastradas
 void chaveADM_off() {
   mensagem(emLeitura);
+  
   while(digitalRead(chaveADM) == LOW){
+    
     // verificando o sistema
     Watchdog.reset();
     VerifySensor();
@@ -582,6 +576,7 @@ void chaveADM_off() {
     // Quando a porta estiver no modo de leitura, a porta pode ser aberta pelo botão de confirmar
     if (buttonADM_confirm_state == LOW || buttonADM_delete_state == LOW 
       || buttonADM_recode_state == LOW || buttonADM_cancel_state == LOW){
+      // abrir a tranca sem mostrar o ID
       abrir_tranca(1);
     }
 
@@ -594,14 +589,16 @@ void chaveADM_off() {
       mensagem(emLeitura);
       continue; 
     }
+    // abrir tranca mostrando a mensagem com ID
     abrir_tranca();
   }
 }
 
 // Função de inicialização do software
 void setup() {
+  // Essa configuração foi mantida aqui por questões de segurança
   pinMode(tranca, OUTPUT);
-  trancaInit();
+  digitalWrite(tranca, HIGH);
 
   Serial.begin(9600);
   finger.begin(57600);
