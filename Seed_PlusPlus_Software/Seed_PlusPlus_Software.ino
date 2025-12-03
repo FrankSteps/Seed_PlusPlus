@@ -1,44 +1,35 @@
 /*
-  Programação da tranca elétrica com solenoide e sensor biométrico
-  Projeto de automatização: 
+  Programação da trave elétrica com solenoide e sensor biométrico
+  Tipo do projeto: Segurança.
 
   Responsável pelo projeto: Professor Leo Souza
   Nome do projeto desenvolvido: Seed++
 
   Desenvolvimento do Seed++ project:
-  Desenvolvido para: O laboratório da FnE - Física na Escola 
+  Desenvolvido para: O laboratório FnEesc
   Desenvolvido por:  Francisco Passos
   Desenvolvido em:   17/06/2025
 
-  Pela última vez - (Software):
+  Pela última vez:
   Modificado em:  03/12/2025
   Modificado por: Francisco Passos
 
-  Manual simplicado do software-hardware abaixo - IMPORTANTE:
-    * Tranca :: HIGH == ABERTO & LOW == fechado
-    * O sensor biométrico funciona com 3.3v
-    * Para deletar tudo, é necessário apertar os botões "delete" e "confirm" ao mesmo tempo e, após isso, confirmar apertando o botão "confirm" 3 vezes
-    * Para apagar apenas uma digital, é necessário apertar o botão "delete" e confirmar apertando no botão "confirm" 2 vezes
-    * para salvar uma nova digital, é necessário confirmar apertando o botão "confirm" 1 vez
-    * O processo de salvar e apagar todos ou apenas um usuário por vez só poderão ser executados no modo ADM com a chave de segurança ligada nomeada como "chave ADM" 
-    * Para cada alteração, aparecerá uma mensagem na tela confirmando o feito e/ou alertando o(os) usuário(os) sobre o processo que está sendo feito
-    * Sempre que o botão cancel for apertado 2 vezes, qualquer operação é cancelada imediatamente
-         O primeiro clique é para "chamar" a atenção do dispositivo sobre querer cancelar
-         O segundo clique é para, de fato, afirmar que quer cancelar a operação
-
-  Como desenvolvedor inicial deste código, qualquer pessoa pode entrar em contato comigo para retirar dúvidas por intermédio de um dos meus e-mails:
+  Como desenvolvedor inicial do código, coloco-me à disposição para esclarecer quaisquer dúvidas por meio dos seguintes endereços de e-mail:
     E-mail pessoal: franciscopassos.contato@gmail.com     
-    E-mail reserva: franksteps.contato@gmail.com
-    E-mail academy: francisco.alves@dcomp.ufs.br
+    E-mail academc: francisco.alves@dcomp.com.br
     E-mail proffss: contato@franksteps.com.br
 
-  Respeite a documentação geral e os comentários deste código. Caso faça alguma mudança, notifique-me pessoalmente e/ou mande uma mensagem por intermédio do e-mail contendo a atualização do programa.
-  Não apague nenhum destes comentários. Eles facilitarão o trabalho de qualquer desenvolvedor e sempre que fizer uma modificação, comente sobre.
+  Solicita-se que a documentação geral e os comentários presentes no código sejam respeitados integralmente. Caso alguma modificação seja 
+  realizada, recomenda-se notificar-me pessoalmente e/ou enviar uma mensagem por e-mail contendo a descrição detalhada da atualização feita.
+  
+  Nenhum dos comentários originais deve ser removido no código original, pois eles facilitam o trabalho de manutenção e continuidade do 
+  desenvolvimento. Sempre que alterações forem feitas, acrescentem comentários explicativos a fim de preservar a clareza estrutural do projeto.
 
-  Descrição dos demais desenvolvedores abaixo, por favor:
-  *
-  *
-  *
+
+  No repositório oficial do projeto no GitHub, a aba de discussões encontra-se aberta, e responderei às dúvidas sempre que possível.
+  Repositório oficial do Seed++: https://github.com/franksteps/Seed_PlusPlus
+
+  -- Demais comentários abaixo --
 */
 
 // Bibliotecas utilizadas pelo Seed++
