@@ -76,10 +76,6 @@ bool buttonADM_cancel_state = false;
 bool buttonADM_confirm_state = false;
 
 
-/* 
-  Bloco de compatibilização de chamadas 
-  Foi usado no switch da função "mensagem". Não retire essa função deste lugar 
-*/
 enum Mensagem {
   erro,
   erroSen,
@@ -102,10 +98,9 @@ void mensagem(int msgTipo, bool apagar = 0){
     lcd.setCursor(0,0);
   }
 
-  // Bloco de mensagens para feedback do usuário/adm :: cada case é uma mensagem
+  // Bloco de mensagens para feedback do usuário/adm
   switch(msgTipo){
     case erro: 
-      //mensagem geral de erro
       Serial.println(F("Erro encontrado"));
       lcd.print(F("Algo deu errado"));
       signalLed(ledR, 3, 700, 700, HIGH);
@@ -119,7 +114,6 @@ void mensagem(int msgTipo, bool apagar = 0){
       signalLed(ledR, 7, 1000, 1000, HIGH);
       signalLed(ledG, 7, 1000, 1000, HIGH);
       
-      //reinicie o Seed++ manualmente se ele parar aqui
       while(true){ 
         for(int i = 0; i < 2; i++){
           digitalWrite(led_ADM, HIGH); 
@@ -187,16 +181,9 @@ void mensagem(int msgTipo, bool apagar = 0){
   }
 }
 
-/* 
- As demais linhas de código devem ficar abaixo deste comentário e acima do void Setup
- Tenha cuidado com as modificações e criações de funções para o projeto.
-
- Lembre-se: Para uma função ser chamada sem dar erro, ela precisa ser declarada antes. 
-*/
 
 // Abre a tranca, espera 3 segundos e fecha
 void abrir_tranca(bool acionadoPorBotao = false) {
-  // Abre a tranca
   digitalWrite(tranca, LOW);
   
   // Chamado quando o sensor encontra uma digital cadastrada
@@ -206,7 +193,6 @@ void abrir_tranca(bool acionadoPorBotao = false) {
   signalLed(ledR, 0, 0, 0, LOW);       
   signalLed(ledG, 1, 3000, 0, LOW);     
 
-  // Fecha a tranca
   digitalWrite(tranca, HIGH);
 
   // Chamado quando um dos botões ADM é pressionado no modo Leitura
@@ -232,7 +218,8 @@ int getNextAvailableID() {
 // Função para cadastrar nova digital lida no sensor e retornar um valor booleano (verdadeiro ou falso)
 bool enrollFingerprint() {
   Watchdog.disable();
-  
+
+  // Alertando o usuário sobre a memória cheia
   int id = getNextAvailableID();
   if (id == -1) {
     Serial.println(F("Memoria cheia"));
@@ -241,8 +228,7 @@ bool enrollFingerprint() {
     lcd.print(F("Memoria cheia"));
     return 0;
   }
-
-  // Indicando o ID que será feito o possível cadastro
+  
   Serial.print(F("ID livre: "));
   Serial.println(id);
   lcd.clear(); 
@@ -251,25 +237,24 @@ bool enrollFingerprint() {
   lcd.print(id);
 
 
-  // Início do processo de gravação de uma nova digital do usuário no dispositivo com autenticação em duas etapas
+  // Autenticação em duas etapas na gravação:
   lcd.setCursor(0,1);
   lcd.print(F("Coloque dedo 1 / 2"));
 
 
-  // Primeira etapa da autenticação 
+  // Primeira etapa
   while (finger.getImage() != FINGERPRINT_OK); 
   if (finger.image2Tz(1) != FINGERPRINT_OK) {
     lcd.clear(); 
     lcd.print(F("Erro na leitura"));
     return 0;
   }
-
   lcd.clear(); 
   lcd.print(F("Remova o dedo"));
   delay(2000);
 
 
-  // Segunda etapa da autenticação 
+  // Segunda etapa
   lcd.clear(); 
   lcd.print(F("Coloque dedo 2 / 2"));
   
@@ -290,7 +275,7 @@ bool enrollFingerprint() {
     return 0;
   }
 
-  // Fim do processo de gravação de digital e mensagem notificando o feito
+  // Fim do processo - finalizada com sucesso
   Serial.print(F("Digital cadastrada ID:"));
   Serial.println(id);
   lcd.clear(); 
@@ -303,17 +288,17 @@ bool enrollFingerprint() {
 }
 
 
-// Função para apagar a digital lida no sensor que retorna um valor booleano
+// Função para apagar a digital lida no sensor
 bool deleteFingerprintByScan() {
   Watchdog.disable();
-  
+
   Serial.println(F("Coloque o dedo p/ apagar"));
   lcd.clear(); 
   lcd.print(F("Coloque o dedo para"));
   lcd.setCursor(0,1);
   lcd.print(F("apagar"));
 
-  // Responsável por converter a digital lida no sensor para binário  
+  // Responsável pela conversão de dados / leitura
   while (finger.getImage() != FINGERPRINT_OK);
   if (finger.image2Tz() != FINGERPRINT_OK) {
     Serial.println(F("Erro na conversao"));
@@ -322,13 +307,12 @@ bool deleteFingerprintByScan() {
     return 0;
   }
 
-  // Procura a digital
+  // Procurando a digital
   if (finger.fingerSearch() != FINGERPRINT_OK) {
     mensagem(nEncontrada);
     delay(3000);
     return 0;
   }
-
   int id = finger.fingerID;
   Serial.print(F("Digital ID: "));
   Serial.println(finger.fingerID);
@@ -348,13 +332,12 @@ bool deleteFingerprintByScan() {
     lcd.print(F("Erro ao apagar"));
     return 0;
   }
-  
   Watchdog.enable(7000);
 }
 
 /*
  Função de retorno de número inteiro que é usado nos botões indicando o número necessário de vezes em que um determinado botão 
- precisa ser precionado (ou não) para uma operação ser considerada como válida ou inválida
+ precisa ser precionado (ou não) para uma operação ser considerada como válida.
 */
 int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, unsigned long timeoutMs = 6000) {
   int confirmCount = 0;
@@ -363,7 +346,7 @@ int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, uns
 
   // Sempre em loop até que haja um valor de retorno "return"
   while (true) {
-    // Espera a ação do usuário, se não tiver, o sistema apenas retorna 0 == cancelado
+    // Cancelado caso não haja resposta do usuário
     if (millis() - startTime > timeoutMs) {
       Serial.println(F("Timeout na espera de acao"));
       signalLed(ledR, 3, 200, 200, HIGH);
@@ -371,7 +354,7 @@ int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, uns
       return 0; 
     }
 
-    // Verifica contador do botão de confirmação 
+    // Botão de confirmação 
     if (digitalRead(buttonADM_confirm) == LOW) {
       confirmCount++;
       Serial.print(F("Confirmações: "));
@@ -383,7 +366,7 @@ int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, uns
       }
     }
 
-    // Verifica contador do botão de cancelamento
+    // Botão de cancelamento
     if (digitalRead(buttonADM_cancel) == LOW) {
       cancelCount++;
       Serial.print(F("Cancelamentos: "));
@@ -410,7 +393,7 @@ void signalLed (int led, int vezes, int tempo0, int tempo1, bool estadof){
 }
 
 
-// Funções para veridicar a comunicação dos componentes com o Seed++
+// Funções que verificam a comunicação dos componentes com o Seed++
 void VerifySensor(){
   if (!finger.verifyPassword()) {
     while (1); 
@@ -426,19 +409,19 @@ bool checkLCD(){
 }
 
 
-// Função responsável pelo modo de administrador - Gravar ou apagar UMA ou TODAS as digitais
+// Modo administrador
 void chaveADM_on(){
   while(digitalRead(chaveADM) == HIGH){
     // verificando o sistema
     Watchdog.reset();
     VerifySensor();
     if (!checkLCD()) {
-      while(1); // watchdog vai reiniciar
+      while(1);
     } else {
       Watchdog.reset();
     }
     
-    // Indicando as variáveis de estado dos botões aos seus respectivos botões:
+    // Indicando as variáveis de estado dos botões 
     buttonADM_recode_state = digitalRead(buttonADM_recode);
     buttonADM_delete_state = digitalRead(buttonADM_delete);
     buttonADM_cancel_state = digitalRead(buttonADM_cancel);
@@ -551,17 +534,17 @@ void chaveADM_on(){
 }
 
 
-// Função responsável pelo modo leitura
+// Modo leitura
 void chaveADM_off() {
   mensagem(emLeitura);
   
   while(digitalRead(chaveADM) == LOW){
     
-    // verificando a comunicação dos componentes com o Seed++
+    // Verificando a comunicação dos componentes com o Seed++
     Watchdog.reset();
     VerifySensor();
     if (!checkLCD()) {
-      while(1); // watchdog vai reiniciar
+      while(1);
     } else {
       Watchdog.reset();
     }
@@ -573,19 +556,19 @@ void chaveADM_off() {
     buttonADM_confirm_state = digitalRead(buttonADM_confirm);
 
     
-    // Quando a porta estiver no modo de leitura, a porta pode ser aberta pelo botão de confirmar
+    // Quando a porta estiver no modo de leitura, a porta pode ser aberta por qualquer botão ADM
     if (buttonADM_confirm_state == LOW || buttonADM_delete_state == LOW 
       || buttonADM_recode_state == LOW || buttonADM_cancel_state == LOW){
-      // abrir a tranca sem mostrar o ID
       abrir_tranca(1);
     }
 
+    // Caso o sensor perceba uma digital...
     if(finger.getImage() != FINGERPRINT_OK) continue;
     if(finger.image2Tz() != FINGERPRINT_OK) continue;
     
     if(finger.fingerSearch() != FINGERPRINT_OK){      
       mensagem(nEncontrada);
-      delay(1500);
+      delay(1000);
       mensagem(emLeitura);
       continue; 
     }
@@ -626,12 +609,12 @@ void setup() {
   Watchdog.enable(7000);
   VerifySensor();
   if (!checkLCD()) {
-    while(1); // watchdog vai reiniciar o arduino
+    while(1);
   }
   Watchdog.reset();
 }
 
-// Função de loop - apenas responsável pela troca dos modos
+// Troca dos modos disponíveis com base no estado da chave de segurança
 void loop(){
   chaveADM_state = digitalRead(chaveADM);
   if(chaveADM_state == HIGH){
