@@ -174,22 +174,19 @@ void mensagem(int msgTipo, bool apagar = 0){
 
 // Abre a tranca, espera 3 segundos e fecha
 void abrir_tranca(bool acionadoPorBotao = false) {
-  digitalWrite(tranca, LOW);
+  digitalWrite(tranca, LOW);  
   
-  // Chamado quando o sensor encontra uma digital cadastrada
   if (!acionadoPorBotao) {
     mensagem(acessPermitido);
   }
-  signalLed(ledR, 0, 0, 0, LOW);       
-  signalLed(ledG, 1, 3000, 0, LOW);     
-
+  signalLed(ledG, 1, 3000, 0, LOW);   
+  delay(50);
   digitalWrite(tranca, HIGH);
-
-  // Chamado quando um dos botões ADM é pressionado no modo Leitura
-  if (acionadoPorBotao) mensagem(emLeitura);
-  signalLed(ledR, 0, 0, 0, HIGH);
+  signalLed(ledR, 0, 0, 0, HIGH);     
+  delay(50);
   mensagem(emLeitura);
 }
+
 
 
 // Função para encontrar e retornar um valor inteiro do próximo ID livre
