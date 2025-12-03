@@ -11,7 +11,7 @@
   Desenvolvido em:   17/06/2025
 
   Pela última vez - (Software):
-  Modificado em:  02/12/2025
+  Modificado em:  03/12/2025
   Modificado por: Francisco Passos
 
   Manual simplicado do software-hardware abaixo - IMPORTANTE:
@@ -166,7 +166,7 @@ void mensagem(int msgTipo, bool apagar = 0){
       Serial.println(F("Modo leitura"));
       lcd.print(F("Modo Leitura ativo"));
       lcd.setCursor(0,1);
-      lcd.print(F("Laboratorio da FnE"));
+      lcd.print(F("Laboratorio FnEsc"));
     break;
     
     case nEncontrada:
@@ -200,7 +200,9 @@ void abrir_tranca(bool acionadoPorBotao = false) {
   digitalWrite(tranca, LOW);
   
   // Chamado quando o sensor encontra uma digital cadastrada
-  if (!acionadoPorBotao) mensagem(acessPermitido);
+  if (!acionadoPorBotao) {
+    mensagem(acessPermitido);
+  }
   signalLed(ledR, 0, 0, 0, LOW);       
   signalLed(ledG, 1, 3000, 0, LOW);     
 
@@ -210,6 +212,7 @@ void abrir_tranca(bool acionadoPorBotao = false) {
   // Chamado quando um dos botões ADM é pressionado no modo Leitura
   if (acionadoPorBotao) mensagem(emLeitura);
   signalLed(ledR, 0, 0, 0, HIGH);
+  mensagem(emLeitura);
 }
 
 
@@ -360,13 +363,12 @@ int verificarAcao(int confirmacoesNecessarias, int cancelamentosNecessarios, uns
 
   // Sempre em loop até que haja um valor de retorno "return"
   while (true) {
-    //cronômetro que vai de 0 à o número em milisec que está na variável "timeoutMs"
+    // Espera a ação do usuário, se não tiver, o sistema apenas retorna 0 == cancelado
     if (millis() - startTime > timeoutMs) {
-      // Timeout atingido
       Serial.println(F("Timeout na espera de acao"));
       signalLed(ledR, 3, 200, 200, HIGH);
       Watchdog.reset();
-      return 0;  // Considera como cancelado
+      return 0; 
     }
 
     // Verifica contador do botão de confirmação 
@@ -408,8 +410,7 @@ void signalLed (int led, int vezes, int tempo0, int tempo1, bool estadof){
 }
 
 
-// Função para verificar o sensor 
-// Caso o sensor apresente falha, ele entra em loop infinito disparando o watch dog
+// Funções para veridicar a comunicação dos componentes com o Seed++
 void VerifySensor(){
   if (!finger.verifyPassword()) {
     while (1); 
@@ -418,11 +419,10 @@ void VerifySensor(){
   }
 }
 
-// Função para verificar o I2C
 bool checkLCD(){
   Wire.beginTransmission(LCD_ADDRESS);
   byte error = Wire.endTransmission();
-  return (error == 0); // 0 = respondeu 
+  return (error == 0); // 0 = respondeu = TRUE
 }
 
 
@@ -551,13 +551,13 @@ void chaveADM_on(){
 }
 
 
-// Função responsável pelo modo normal - modo somente de leitura de digitais cadastradas
+// Função responsável pelo modo leitura
 void chaveADM_off() {
   mensagem(emLeitura);
   
   while(digitalRead(chaveADM) == LOW){
     
-    // verificando o sistema
+    // verificando a comunicação dos componentes com o Seed++
     Watchdog.reset();
     VerifySensor();
     if (!checkLCD()) {
