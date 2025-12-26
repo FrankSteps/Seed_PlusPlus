@@ -11,7 +11,7 @@
   Desenvolvido em:   17/06/2025
 
   Pela última vez:
-  Modificado em:  03/12/2025
+  Modificado em:  26/12/2025
   Modificado por: Francisco Passos
 
   Como desenvolvedor inicial do código, coloco-me à disposição para esclarecer quaisquer dúvidas por meio dos seguintes endereços de e-mail:
@@ -25,9 +25,11 @@
   Nenhum dos comentários originais deve ser removido no código original, pois eles facilitam o trabalho de manutenção e continuidade do 
   desenvolvimento. Sempre que alterações forem feitas, acrescentem comentários explicativos a fim de preservar a clareza estrutural do projeto.
 
-
   No repositório oficial do projeto no GitHub, a aba de discussões encontra-se aberta, e responderei às dúvidas sempre que possível.
   Repositório oficial do Seed++: https://github.com/franksteps/Seed_PlusPlus
+
+  Ao aplicar o watchdog em outras partes do projeto, tenha cuidado com as funções que estão sendo usadas no projeto. Elas também precisam atualizar
+  o watchdog caso elas sejam chamadas em uma função que tenha o watchdog ativado. 
 
   -- Demais comentários abaixo --
 */
@@ -37,6 +39,7 @@
 #include <LiquidCrystal_I2C.h> 
 #include <Wire.h>
 #include <Adafruit_Fingerprint.h> 
+#include <avr/wdt.h>
 
 #define LCD_ADDRESS 0x27
 
@@ -67,16 +70,8 @@ bool buttonADM_confirm_state = false;
 
 
 enum Mensagem {
-  erro,
-  erroSen,
-  senPronto,
-  operExecutada,
-  operCancel,
-  emADM,
-  mensg2xCancela,
-  emLeitura,
-  nEncontrada,
-  acessPermitido
+  erro, erroSen, senPronto, operExecutada, operCancel, emADM,
+  mensg2xCancela, emLeitura, nEncontrada, acessPermitido
 };
 
 
@@ -97,7 +92,7 @@ void mensagem(int msgTipo, bool apagar = 0){
     break;
 
     case erroSen:
-      Serial.println("Erro no sensor biométrico");
+      Serial.println(F("Erro no sensor biométrico"));
       lcd.print(F("(!) Erro critico"));
       lcd.setCursor(0,1);
       lcd.print(F("Reinicie agora"));
@@ -179,11 +174,16 @@ void abrir_tranca(bool acionadoPorBotao = false) {
   if (!acionadoPorBotao) {
     mensagem(acessPermitido);
   }
-  signalLed(ledG, 1, 3000, 0, LOW);   
+
+  signalLed(ledG, 1, 3000, 0, LOW); 
   delay(50);
+  wdt_reset();
+
   digitalWrite(tranca, HIGH);
   signalLed(ledR, 0, 0, 0, HIGH);     
   delay(50);
+
+  wdt_reset();
   mensagem(emLeitura);
 }
 
@@ -383,6 +383,10 @@ void VerifySensor(){
 
 // Modo administrador
 void chaveADM_on(){
+  // desabilitando o watchdog para evitar contra-tempos já que o watchdog não é necessário quando a chave está engatada
+  wdt_reset();
+  wdt_disable();
+
   mensagem(emADM);
   
   while(digitalRead(chaveADM) == HIGH){
@@ -491,6 +495,10 @@ void chaveADM_on(){
 
 // Modo leitura
 void chaveADM_off() {
+  // habilitando o watchdog FORA DO LAÇO DE REPETIÇÃO e resentando logo em seguida
+  wdt_enable(WDTO_5S);
+  wdt_reset();
+
   mensagem(emLeitura);
   
   while(digitalRead(chaveADM) == LOW){
@@ -500,10 +508,13 @@ void chaveADM_off() {
     buttonADM_cancel_state = digitalRead(buttonADM_cancel);
     buttonADM_confirm_state = digitalRead(buttonADM_confirm);
 
+    // resentando o timer para o hardware não apagar
+    wdt_reset();
     
     // Quando a porta estiver no modo de leitura, a porta pode ser aberta por qualquer botão ADM
     if (buttonADM_confirm_state == LOW || buttonADM_delete_state == LOW 
       || buttonADM_recode_state == LOW || buttonADM_cancel_state == LOW){
+      wdt_reset();
       abrir_tranca(1);
     }
 
@@ -517,7 +528,9 @@ void chaveADM_off() {
       mensagem(emLeitura);
       continue; 
     }
+
     // abrir tranca mostrando a mensagem com ID
+    wdt_reset();
     abrir_tranca();
   }
 }
@@ -526,14 +539,14 @@ void chaveADM_off() {
 void setup() {
   // Essa configuração foi mantida aqui por questões de segurança
   pinMode(tranca, OUTPUT);
+  wdt_disable();
   digitalWrite(tranca, HIGH);
   Serial.begin(9600);
   finger.begin(57600);
 
-  /*
-   O sistema para verificar a comunicação do sensor biométrico e da tela LCD com o Seed++ foi retirado apenas por um momento. 
-   Assim que possível, irei aplicá-los novamente. 
-  */
+  // habilitando o watch dog 
+  wdt_enable(WDTO_5S);
+  wdt_reset();
 
   // Configurandos todos os componentes do seed++
   pinMode(ledR, OUTPUT);
@@ -552,11 +565,14 @@ void setup() {
   lcd.backlight();
   lcd.setCursor(0,0);
   lcd.clear();
+  wdt_reset();
 }
 
 // Troca dos modos disponíveis com base no estado da chave de segurança
 void loop(){
   chaveADM_state = digitalRead(chaveADM);
+  wdt_reset();
+
   if(chaveADM_state == HIGH){
     // Modo administrador
     digitalWrite(led_ADM, HIGH);
