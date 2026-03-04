@@ -1,0 +1,10 @@
+# Ignorar todos os arquivos
+*
+
+# Exceto estas pastas e arquivos
+!.gitignore
+!.gitattributes
+!Seed_PlusPlus_Software/
+!Seed_PlusPlus_Software/** 
+!Seed_PlusPlus_case/
+!Seed_PlusPlus_case/** 
