@@ -1,7 +1,5 @@
-# reconhece sketches Arduino
 *.ino linguist-language=Arduino
 *.pde linguist-language=Arduino
-
-# Deixa .h e .cpp como C++
 *.h linguist-language=C++
 *.cpp linguist-language=C++
+*.stl linguist-vendored
