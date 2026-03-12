@@ -3,7 +3,9 @@
 
 # Exceto estas pastas e arquivos
 !.gitignore
-!.gitattributes
+!CONTRIBUTING.md
+!LICENSE
+!README.md
 !Seed_PlusPlus_Software/
 !Seed_PlusPlus_Software/** 
 !Seed_PlusPlus_case/
