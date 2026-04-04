@@ -6,15 +6,17 @@ O sistema permite o **CRUD de usuários**, ou seja, usuários podem ser registra
 
 Além de ser um projeto funcional, o objetivo deste dispositivo também é servir como **estudo de sistemas embarcados e de paradigmas de programação aplicados ao desenvolvimento de hardware**.
 
+
 ## Features
 
 * Cadastrar usuários
-* Remover um único usuário
+* Remover um único usuário por seu ID
 * Remover todos os usuários
 * Tela LCD e LEDs para feedback do usuário
 * Modo administrador e modo leitura
 * Barrar o acesso de pessoas não cadastradas
 * Liberar o acesso de pessoas cadastradas
+
 
 ## Componentes
 
@@ -28,11 +30,13 @@ Além de ser um projeto funcional, o objetivo deste dispositivo também é servi
 * Botões
 * Fonte de 12V
 
+
 ## Como contribuir
 
 O guia para futuros contribuidores está disponível em [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Esse guia tem como objetivo, junto com a documentação do projeto, auxiliar futuros desenvolvedores da FnEsc que desejem trabalhar ou dar continuidade ao sistema.
+
 
 ## Licença
 

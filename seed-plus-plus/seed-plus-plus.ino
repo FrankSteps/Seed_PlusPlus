@@ -33,10 +33,11 @@
 */
 
 // Bibliotecas utilizadas pelo Seed++
-#include <SoftwareSerial.h> 
-#include <LiquidCrystal_I2C.h> 
+#include <Arduino.h>
+#include <SoftwareSerial.h>
+#include <LiquidCrystal_I2C.h>
 #include <Wire.h>
-#include <Adafruit_Fingerprint.h> 
+#include <Adafruit_Fingerprint.h>
 
 #define LCD_ADDRESS 0x27
 
