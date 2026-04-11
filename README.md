@@ -21,11 +21,12 @@ Além de ser um projeto funcional, o objetivo deste dispositivo também é servi
 ## Componentes
 
 * Arduino Nano
-* Sensor biométrico: Adafruit Fingerprint
+* Módulo RFID
 * Solenoide
 * Módulo regulador de tensão step-down
 * Módulo relé
-* LEDs e tela LCD com módulo de comunicação I2C
+* Tela LCD com módulo de comunicação I2C
+* LEDs
 * Interruptor ON/OFF com chave de segurança
 * Botões
 * Fonte de 12V

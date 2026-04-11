@@ -1,1 +1,6 @@
-docs/
+*.aux 
+*.log
+*.out
+*.tex
+*.toc
+*.exe
