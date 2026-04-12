@@ -31,17 +31,17 @@
 
 
 // Valores analógicos dos botões (calibre conforme necessário)
-#define BUTTON_RECODE_MIN  800
-#define BUTTON_RECODE_MAX  1023
- 
-#define BUTTON_DELETE_MIN  600
-#define BUTTON_DELETE_MAX  800
- 
-#define BUTTON_CANCEL_MIN  300
-#define BUTTON_CANCEL_MAX  600
+#define RECODE_MIN  800
+#define RECODE_MAX  1023
 
-#define BUTTON_CONFIRM_MIN 0
-#define BUTTON_CONFIRM_MAX 300
+#define DELETE_MIN  600
+#define DELETE_MAX  800
+
+#define CANCEL_MIN  300
+#define CANCEL_MAX  600
+
+#define CONFIRM_MIN 0
+#define CONFIRM_MAX 300
 
 
 #endif
